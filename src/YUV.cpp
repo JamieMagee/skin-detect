@@ -24,7 +24,8 @@ int main(int argc, char** argv) {
     }
     
     cvtColor(img, imgYUV, CV_BGR2YCrCb); //Convert to YUV colorspace
-    
+	imgHist = Mat::zeros(img.size(), CV_32F);
+	
     namedWindow(window1_name, CV_WINDOW_AUTOSIZE ); //Create video window
     namedWindow(window2_name, CV_WINDOW_AUTOSIZE ); //Create thresholded video window
     
@@ -35,9 +36,9 @@ int main(int argc, char** argv) {
     createTrackbar("Max Cr", window2_name, &max_Cr, max_value, threshold);
     createTrackbar("Min Cb", window2_name, &min_Cb, max_value, threshold);
     createTrackbar("Max Cb", window2_name, &max_Cb, max_value, threshold);
+    createTrackbar("Temporal weighting", window2_name, &weighting, max_value, threshold);
 	  
 	while(true) {
-	    int c;
 	    c = waitKey(20);
 	    if((char)c == 27) break; //Exit if ESC key is hit
 	    
@@ -54,15 +55,17 @@ int main(int argc, char** argv) {
 	}
 }
 
-void threshold (int, void*) {
+void threshold(int, void*) {
 	inRange(imgYUV, Scalar(min_Y, min_Cr, min_Cb), Scalar(max_Y, max_Cr, max_Cb), imgThreshed); //Check if pixels are in range
-    morphology(0,0); //Perform Morphology
+    morphology(); //Perform Morphology
 }
 
-void morphology(int, void*) {
+void morphology() {
 	// Apply the specified morphology operation
 	morphologyEx(imgThreshed, imgThreshed, CV_MOP_ERODE, Mat1b(3,3,1), Point(-1, -1), 3);
 	morphologyEx(imgThreshed, imgThreshed, CV_MOP_OPEN, Mat1b(7,7,1), Point(-1, -1), 1);
 	morphologyEx(imgThreshed, imgMorph, CV_MOP_CLOSE, Mat1b(9,9,1), Point(-1, -1), 3);
-	imshow(window2_name, imgMorph);
+	accumulateWeighted(imgMorph, imgHist, ((double) weighting/255));
+	//cout << "Weighting: " << ((double) weighting/255) << endl;
+	imshow(window2_name, imgHist);
 }
