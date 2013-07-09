@@ -5,4 +5,4 @@ LIBS = `pkg-config opencv --libs`
 	g++ $(CFLAGS) -o bin/$@ $< -std=c++0x -O3 $(LIBS)
 	
 clean:
-	rm -rf bin/*.o bin/YUV
+	rm -rf bin/*
