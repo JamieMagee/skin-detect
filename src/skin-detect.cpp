@@ -82,18 +82,18 @@ void colour_segmentation()
 void density_regularisation()
 {
 	Mat sum;
-	sum = Mat::zeros((img.rows / 4), (img.cols / 4), CV_8UC1);
+	sum = Mat::zeros(img.rows, img.cols, CV_8UC1);
 	uchar op;
 	int erode, dilate;
-	for (int i = 0; i < ((img.rows) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 0; i < img.rows; i+=4) //Cycle over horizontal clusters
 	{
-		for (int j = 0; j < ((img.cols) / 4); j++) //Cycle over vertical clusters
+		for (int j = 0; j < img.cols; j+=4) //Cycle over vertical clusters
 		{
 			for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
 			{
 				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 				{
-					if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) != 0) sum.at<uchar>(i, j)++;
+					if (imgFilter.at<uchar>(i + k, j + l) != 0) sum.at<uchar>(i, j)++;
 				}
 			}
 			if (sum.at<uchar>(i, j) == 0 || i == 0 || j == 0 || i == (img.rows - 4) / 4 || j == (img.cols - 4) / 4) op = 0;
@@ -103,23 +103,23 @@ void density_regularisation()
 			{
 				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 				{
-					imgFilter.at<uchar>(4 * i + k, 4 * j + l) = op;
+					imgFilter.at<uchar>(i + k, j + l) = op;
 				}
 			}
 		}
 	}
-	for (int i = 1; i < ((img.rows - 4) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 0; i < img.rows; i+=4) //Cycle over horizontal clusters
 	{
-		for (int j = 1; j < ((img.cols - 4) / 4); j++) //Cycle over vertical clusters
+		for (int j = 0; j < img.cols; j+=4) //Cycle over vertical clusters
 		{
 			erode = 0;
-			if (imgFilter.at<uchar>(4 * i, 4 * j) == 255)
+			if (imgFilter.at<uchar>(i, j) == 255)
 			{
 				for (int k = -4; k < 5; k += 4)
 				{
 					for (int l = -4; l < 5; l += 4)
 					{
-						if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) == 255) erode++;
+						if (imgFilter.at<uchar>(i + k, j + l) == 255) erode++;
 					}
 				}
 				if (erode < ERODE_SIZE)
@@ -128,25 +128,25 @@ void density_regularisation()
 					{
 						for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 						{
-							imgFilter.at<uchar>(4 * i + k, 4 * j + l) = 0;
+							imgFilter.at<uchar>(i + k, j + l) = 0;
 						}
 					}
 				}
 			}
 		}
 	}
-	for (int i = 1; i < ((img.rows - 4) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 0; i < img.rows; i+=4) //Cycle over horizontal clusters
 	{
-		for (int j = 1; j < ((img.cols - 4) / 4); j++) //Cycle over vertical clusters
+		for (int j = 0; j < img.cols; j+=4) //Cycle over vertical clusters
 		{
 			dilate = 0;
-			if (imgFilter.at<uchar>(4 * i, 4 * j) < 255)
+			if (imgFilter.at<uchar>(i, j) < 255)
 			{
 				for (int k = -4; k < 5; k += 4)
 				{
 					for (int l = -4; l < 5; l += 4)
 					{
-						if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) == 255) dilate++;
+						if (imgFilter.at<uchar>(i + k, j + l) == 255) dilate++;
 					}
 				}
 				if (dilate > DILATE_SIZE)
@@ -155,7 +155,7 @@ void density_regularisation()
 					{
 						for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 						{
-							imgFilter.at<uchar>(4 * i + k, 4 * j + l) = 255;
+							imgFilter.at<uchar>(i + k, j + l) = 255;
 						}
 					}
 				}
@@ -164,7 +164,7 @@ void density_regularisation()
 			{
 				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 				{
-					if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) != 255) imgFilter.at<uchar>(4 * i + k, 4 * j + l) = 0;
+					if (imgFilter.at<uchar>(i + k, j + l) != 255) imgFilter.at<uchar>(i + k, j + l) = 0;
 				}
 			}
 		}
@@ -188,9 +188,9 @@ void density_regularisation()
 void luminance_regularisation()
 {
 	float xbar, sse, stddev;
-	for (int i = 0; i < ((img.rows) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 0; i < img.rows; i+=4) //Cycle over horizontal clusters
 	{
-		for (int j = 0; j < ((img.cols) / 4); j++) //Cycle over vertical clusters
+		for (int j = 0; j < img.cols; j+=4) //Cycle over vertical clusters
 		{
 			xbar = 0;
 			sse = 0;
@@ -199,7 +199,7 @@ void luminance_regularisation()
 			{
 				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 				{
-					xbar += img.at<Vec3b>(4 * i + k, 4 * j + l)[0];
+					xbar += img.at<Vec3b>(i + k, j + l)[0];
 				}
 			}
 			xbar /= 16;
@@ -207,7 +207,7 @@ void luminance_regularisation()
 			{
 				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 				{
-					sse += pow(img.at<Vec3b>(4 * i + k, 4 * j + l)[0] - xbar, 2);
+					sse += pow(img.at<Vec3b>(i + k, j + l)[0] - xbar, 2);
 				}
 			}
 			stddev = pow(sse / 16, 0.5);
@@ -215,14 +215,14 @@ void luminance_regularisation()
 			{
 				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 				{
-					if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) == 255 && stddev >= 2) imgFilter.at<uchar>(4 * i + k, 4 * j + l) = 255;
+					if (imgFilter.at<uchar>(i + k, j + l) == 255 && stddev >= 2) imgFilter.at<uchar>(i + k, j + l) = 255;
 				}
 			}
 		}
 	}
 }
 
-/**********************************************************************
+/***********************************************************************
  * Step Four: Geometric Correction
  *
  * Further mophology:
@@ -233,23 +233,23 @@ void luminance_regularisation()
  *
  * Filter horizontally then vertically setting any runs of less than
  * four clusters to zero
- *********************************************************************/
+ ***************************************************£******************/
 
 void geometric_correction()
 {
 	int erode, dilate, sum;
-	for (int i = 1; i < ((img.rows - 4) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 3; i < (img.rows - 4); i++) //Cycle over horizontal clusters
 	{
-		for (int j = 1; j < ((img.cols - 4) / 4); j++) //Cycle over vertical clusters
+		for (int j = 3; j < (img.cols - 4); j++) //Cycle over vertical clusters
 		{
 			erode = 0;
-			if (imgFilter.at<uchar>(4 * i, 4 * j) == 255)
+			if (imgFilter.at<uchar>(i, j) == 255)
 			{
 				for (int k = -4; k < 5; k += 4)
 				{
 					for (int l = -4; l < 5; l += 4)
 					{
-						if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) == 255) erode++;
+						if (imgFilter.at<uchar>(i + k, j + l) == 255) erode++;
 					}
 				}
 				if (erode < DILATE_SIZE)
@@ -258,25 +258,25 @@ void geometric_correction()
 					{
 						for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 						{
-							imgFilter.at<uchar>(4 * i + k, 4 * j + l) = 0;
+							imgFilter.at<uchar>(i + k, j + l) = 0;
 						}
 					}
 				}
 			}
 		}
 	}
-	for (int i = 1; i < ((img.rows - 4) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 3; i < (img.rows - 4); i++) //Cycle over horizontal clusters
 	{
-		for (int j = 1; j < ((img.cols - 4) / 4); j++) //Cycle over vertical clusters
+		for (int j = 3; j < (img.cols - 4); j++) //Cycle over vertical clusters
 		{
 			dilate = 0;
-			if (imgFilter.at<uchar>(4 * i, 4 * j) < 255)
+			if (imgFilter.at<uchar>(i, j) < 255)
 			{
 				for (int k = -4; k < 5; k += 4)
 				{
 					for (int l = -4; l < 5; l += 4)
 					{
-						if (imgFilter.at<uchar>(4 * i + k, 4 * j + l) == 255) dilate++;
+						if (imgFilter.at<uchar>(i + k, j + l) == 255) dilate++;
 					}
 				}
 				if (dilate > ERODE_SIZE)
@@ -285,37 +285,37 @@ void geometric_correction()
 					{
 						for (int l = 0; l < 4; l++) //Cycle vertically within cluster
 						{
-							imgFilter.at<uchar>(4 * i + k, 4 * j + l) = 255;
+							imgFilter.at<uchar>(i + k, j + l) = 255;
 						}
 					}
 				}
 			}
 		}
 	}
-	for (int i = 1; i < ((img.cols - 4) / 4); i++) //Cycle over vertical clusters
+	for (int i = 3; i < (img.cols - 4); i++) //Cycle over vertical clusters
 	{
-		for (int j = 1; j < ((img.rows - 4) / 4); j++) //Cycle over horizontal clusters
+		for (int j = 3; j < (img.rows - 4); j++) //Cycle over horizontal clusters
 		{
-			if (imgFilter.at<uchar>(4 * j, 4 * i) == 255) sum++;
-			else if (sum > 0 && sum < 4 && 4 * j < 12)
+			if (imgFilter.at<uchar>(j, i) == 255) sum++;
+			else if (sum > 0 && sum < 4 && j < 12)
 			{
 				for (sum; sum == 0; sum--)
 				{
-					imgFilter.at<uchar>(4 * j, 4 * i - sum) = 0;
+					imgFilter.at<uchar>(j, i - sum) = 0;
 				}
 			}
 		}
 	}
-	for (int i = 1; i < ((img.rows - 4) / 4); i++) //Cycle over horizontal clusters
+	for (int i = 3; i < (img.rows - 4); i++) //Cycle over horizontal clusters
 	{
-		for (int j = 1; j < ((img.cols - 4) / 4); j++) //Cycle over vertical clusters
+		for (int j = 3; j < (img.cols - 4); j++) //Cycle over vertical clusters
 		{
-			if (imgFilter.at<uchar>(4 * j, 4 * i) == 255) sum++;
-			else if (sum > 0 && sum < 4 && 4 * j < 12)
+			if (imgFilter.at<uchar>(j, i) == 255) sum++;
+			else if (sum > 0 && sum < 4 && j < 12)
 			{
 				for (sum; sum == 0; sum--)
 				{
-					imgFilter.at<uchar>(4 * j, 4 * i - sum) = 0;
+					imgFilter.at<uchar>(j, i - sum) = 0;
 				}
 			}
 		}
