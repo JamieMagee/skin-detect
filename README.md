@@ -1,4 +1,4 @@
-skin-detect
+skin-detect [![Build Status](https://travis-ci.org/JamieMagee/skin-detect.png)](https://travis-ci.org/JamieMagee/skin-detect)
 ===========
 
 Skin detection in C++ using OpenCV. The algorithm used is described in a paper titled [Face Segmentation Using Skin-Color
