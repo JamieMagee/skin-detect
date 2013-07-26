@@ -233,7 +233,7 @@ void luminance_regularisation()
  *
  * Filter horizontally then vertically setting any runs of less than
  * four clusters to zero
- ***************************************************£******************/
+ **********************************************************************/
 
 void geometric_correction()
 {
