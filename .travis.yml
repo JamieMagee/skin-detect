@@ -1,0 +1,11 @@
+language: cpp
+
+compiler: gcc
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libcv-dev
+  - sudo apt-get install libopencv-dev
+  - sudo apt-get install libhighgui-dev
+  
+script: make skin-detect
