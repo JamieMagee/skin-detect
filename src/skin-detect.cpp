@@ -2,47 +2,75 @@
 
 int main(int argc, char** argv)
 {
-	if (argc != 2)   //Check the correct syntax is used to open a file
+	if (argc > 2)
 	{
-		cout << "Usage: " << argv[0] << " Video" << endl;
+		cout << "Usage" << argv[0] << " /path/to/video for file input" << endl;
+		cout << "or" << endl;
+		cout << "Usage" << argv[0] << " for webcam input" << endl;
 		return -1;
 	}
-	VideoCapture cap(argv[1]); //Open Video
+	else if (argc == 2)
+	{
+		cap.open(argv[1]);
+	}
+	else
+	{
+		cap.open(CV_CAP_ANY);
+	}
+
 	if (!cap.isOpened())   //Check if video has been opened correctly
 	{
 		cout << "Cannot open camera" << endl;
 		return -1;
 	}
+	
 	//for (int i=0; i<3000; i++) { //Skip to interesting parts of long videos
 	cap >> img; //Capture the first frame of the video
 	//}
+	
 	if (!img.data)  //Check for invalid input
 	{
 		cout <<  "Could not open video" << endl ;
 		return -1;
 	}
+	
 	cvtColor(img, imgFilter, CV_BGR2YCrCb); //Convert to YUV colorspace
 	namedWindow(window1_name, CV_WINDOW_AUTOSIZE);  //Create video window
 	namedWindow(window2_name, CV_WINDOW_AUTOSIZE);  //Create thresholded video window
-	while (true)
+	
+	if (argc == 2)
 	{
-		c = waitKey(20);
-		if ((char)c == 27) break; //Exit if ESC key is hit
-		//Debug info
-		cout << "Frames in video: " << cap.get(CV_CAP_PROP_FRAME_COUNT) << "	Current Frame: " << cap.get(CV_CAP_PROP_POS_FRAMES) << "	FPS: " << cap.get(CV_CAP_PROP_FPS) << endl;
-		if (cap.get(CV_CAP_PROP_FRAME_COUNT) > cap.get(CV_CAP_PROP_POS_FRAMES))   //If current frame is less than length of video
+		while (true)
 		{
-			imshow(window1_name, img); //Show captured frame
-			colour_segmentation();
-			density_regularisation();
-			luminance_regularisation();
-			geometric_correction();
-			imshow(window2_name, imgFilter);
-			cap >> img; //Capture next frame
-			cvtColor(img, imgFilter, CV_BGR2YCrCb); //Convert to YUV colourspace
+			c = waitKey(20);
+			if ((char)c == 27) break; //Exit if ESC key is hit
+			//Debug info
+			cout << "Frames in video: " << cap.get(CV_CAP_PROP_FRAME_COUNT) << "	Current Frame: " << cap.get(CV_CAP_PROP_POS_FRAMES) << "	FPS: " << cap.get(CV_CAP_PROP_FPS) << endl;
+			if (cap.get(CV_CAP_PROP_FRAME_COUNT) == cap.get(CV_CAP_PROP_POS_FRAMES)) cap.set(CV_CAP_PROP_POS_FRAMES, 0);  //If at end of video, loop back to start
+			process_image();		
 		}
-		else cap.set(CV_CAP_PROP_POS_FRAMES, 0); //If EOF go to start (and collect £200)
 	}
+	else
+	{
+		while(true)
+		{
+			c = waitKey(20);
+			if ((char)c == 27) break; //Exit if ESC key is hit
+			process_image();
+		}	
+	}
+}
+
+void process_image()
+{
+	imshow(window1_name, img); //Show captured frame
+	colour_segmentation();
+	density_regularisation();
+	luminance_regularisation();
+	geometric_correction();
+	imshow(window2_name, imgFilter);
+	cap >> img; //Capture next frame
+	cvtColor(img, imgFilter, CV_BGR2YCrCb); //Convert to YUV colourspace
 }
 
 /***********************************************************************

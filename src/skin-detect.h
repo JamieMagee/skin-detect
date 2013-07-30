@@ -16,12 +16,14 @@ using namespace std;
 
 Mat img, imgFilter;
 int c;
+VideoCapture cap;
 
 //Window names
 string window1_name = "Video";
 string window2_name = "Skin";
 
 //Prototype functions
+void process_image();
 void colour_segmentation();
 void density_regularisation();
 void luminance_regularisation();
