@@ -11,4 +11,9 @@
 *.lai
 *.la
 *.a
+
+# Grany project file
 *.geany
+
+# Binary file
+bin/*

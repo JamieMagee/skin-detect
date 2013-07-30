@@ -14,4 +14,6 @@ Compiling
 Usage
 =====
 
-`./skin-detect /path/to/video`
+`./skin-detect` for webcam input
+or
+`./skin-detect /path/to/video` for video file input
