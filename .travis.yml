@@ -5,8 +5,7 @@ compiler:
   - clang
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install libcv-dev libopencv-dev libhighgui-dev
+  - ./opencv2_4_6_1.sh
   
 before_script:
   - mkdir bin
