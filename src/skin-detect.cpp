@@ -37,6 +37,21 @@ int main(int argc, char** argv)
 	cvtColor(img, imgFilter, CV_BGR2YCrCb); //Convert to YUV colorspace
 	namedWindow(window1_name, CV_WINDOW_AUTOSIZE);  //Create video window
 	namedWindow(window2_name, CV_WINDOW_AUTOSIZE);  //Create thresholded video window
+	namedWindow(window3_name, CV_WINDOW_AUTOSIZE);	//Create settings window
+	
+	createTrackbar("Colour Segmentation", window3_name, &cs, 1, process_image);
+	createTrackbar("Min Cr", window3_name, &min_Cr, 255, process_image);
+    createTrackbar("Max Cr", window3_name, &max_Cr, 255, process_image);
+    createTrackbar("Min Cb", window3_name, &min_Cb, 255, process_image);
+    createTrackbar("Max Cb", window3_name, &max_Cb, 255, process_image);
+	createTrackbar("Density Regularisation", window3_name, &dr, 1, process_image);
+	createTrackbar("Erosion 1 Kernel Size", window3_name, &erode1, 9, process_image);
+	createTrackbar("Dilation 1 Kernel Size", window3_name, &dilate1, 9, process_image);
+	createTrackbar("Luminance Regularisation", window3_name, &lr, 1, process_image);
+	createTrackbar("Luminance stddev", window3_name, &deviation, 10, process_image);
+	createTrackbar("Geometric Correction", window3_name, &gc, 1, process_image);
+	createTrackbar("Erosion 2 Kernel Size", window3_name, &erode2, 9, process_image);
+	createTrackbar("Dilation 2 Kernel Size", window3_name, &dilate2, 9, process_image);
 	
 	if (argc == 2)
 	{
@@ -47,7 +62,7 @@ int main(int argc, char** argv)
 			//Debug info
 			cout << "Frames in video: " << cap.get(CV_CAP_PROP_FRAME_COUNT) << "	Current Frame: " << cap.get(CV_CAP_PROP_POS_FRAMES) << "	FPS: " << cap.get(CV_CAP_PROP_FPS) << endl;
 			if (cap.get(CV_CAP_PROP_FRAME_COUNT) == cap.get(CV_CAP_PROP_POS_FRAMES)) cap.set(CV_CAP_PROP_POS_FRAMES, 0);  //If at end of video, loop back to start
-			process_image();		
+			process_image(0,0);		
 		}
 	}
 	else
@@ -56,18 +71,18 @@ int main(int argc, char** argv)
 		{
 			c = waitKey(20);
 			if ((char)c == 27) break; //Exit if ESC key is hit
-			process_image();
+			process_image(0,0);
 		}	
 	}
 }
 
-void process_image()
+void process_image(int, void*)
 {
 	imshow(window1_name, img); //Show captured frame
-	colour_segmentation();
-	density_regularisation();
-	luminance_regularisation();
-	geometric_correction();
+	if (cs) colour_segmentation();
+	if (dr) density_regularisation();
+	if (lr) luminance_regularisation();
+	if (gc) geometric_correction();
 	imshow(window2_name, imgFilter);
 	cap >> img; //Capture next frame
 	cvtColor(img, imgFilter, CV_BGR2YCrCb); //Convert to YUV colourspace
@@ -84,7 +99,7 @@ void process_image()
 
 void colour_segmentation()
 {
-	inRange(img, Scalar(0, 77, 133), Scalar(255, 127, 173), imgFilter);
+	inRange(img, Scalar(0, min_Cb, min_Cr), Scalar(255, max_Cb, max_Cr), imgFilter);
 }
 
 /***********************************************************************
@@ -150,7 +165,7 @@ void density_regularisation()
 						if (imgFilter.at<uchar>(i + k, j + l) == 255) erode++;
 					}
 				}
-				if (erode < ERODE_SIZE)
+				if (erode < erode1)
 				{
 					for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
 					{
@@ -177,7 +192,7 @@ void density_regularisation()
 						if (imgFilter.at<uchar>(i + k, j + l) == 255) dilate++;
 					}
 				}
-				if (dilate > DILATE_SIZE)
+				if (dilate > dilate1)
 				{
 					for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
 					{
@@ -239,11 +254,14 @@ void luminance_regularisation()
 				}
 			}
 			stddev = pow(sse / 16, 0.5);
-			for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
+			if (imgFilter.at<uchar>(i, j) == 255 && deviation >= deviation) 
 			{
-				for (int l = 0; l < 4; l++) //Cycle vertically within cluster
+				for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
 				{
-					if (imgFilter.at<uchar>(i + k, j + l) == 255 && stddev >= 2) imgFilter.at<uchar>(i + k, j + l) = 255;
+					for (int l = 0; l < 4; l++) //Cycle vertically within cluster
+					{
+						imgFilter.at<uchar>(i + k, j + l) = 255;
+					}
 				}
 			}
 		}
@@ -280,7 +298,7 @@ void geometric_correction()
 						if (imgFilter.at<uchar>(i + k, j + l) == 255) erode++;
 					}
 				}
-				if (erode < DILATE_SIZE)
+				if (erode < erode2)
 				{
 					for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
 					{
@@ -307,7 +325,7 @@ void geometric_correction()
 						if (imgFilter.at<uchar>(i + k, j + l) == 255) dilate++;
 					}
 				}
-				if (dilate > ERODE_SIZE)
+				if (dilate > dilate2)
 				{
 					for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
 					{
