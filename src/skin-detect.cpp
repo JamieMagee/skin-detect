@@ -30,6 +30,7 @@ int main(int argc, char** argv)
 		cout <<  "Could not open video" << endl ;
 		return -1;
 	}
+	imgHist = Mat::zeros(img.size(), CV_32F);
 	namedWindow(window1_name, CV_WINDOW_AUTOSIZE);  //Create video window
 	namedWindow(window2_name, CV_WINDOW_AUTOSIZE);  //Create thresholded video window
 	namedWindow(window3_name, CV_WINDOW_AUTOSIZE);	//Create settings window
@@ -46,6 +47,8 @@ int main(int argc, char** argv)
 	createTrackbar("Geometric Correction", window3_name, &gc, 1, process_image);
 	createTrackbar("Erosion 2 Kernel Size", window3_name, &erode2, 9, process_image);
 	createTrackbar("Dilation 2 Kernel Size", window3_name, &dilate2, 9, process_image);
+	createTrackbar("Average Frames", window3_name, &af, 1, process_image);
+	createTrackbar("Weighting", window3_name, &weighting, 255, process_image);
 	if (argc == 2)
 	{
 		while (true)
@@ -77,7 +80,8 @@ void process_image(int, void*)
 	if (dr) density_regularisation();
 	if (lr) luminance_regularisation();
 	if (gc) geometric_correction();
-	imshow(window2_name, imgFilter);
+	if (af) average_frame();
+	imshow(window2_name, imgHist);
 	cap >> img; //Capture next frame
 }
 
@@ -332,32 +336,47 @@ void geometric_correction()
 			}
 		}
 	}
-	for (int i = 4; i < (img.cols - 4); i+=4) //Cycle over vertical clusters
-	{
-		for (int j = 4; j < (img.rows - 4); j+=4) //Cycle over horizontal clusters
-		{
-			if (imgFilter.at<uchar>(j, i) == 255) sum++;
-			else if (sum > 0 && sum < 4 && j >= 16)
-			{
-				for (sum; sum == 0; sum--)
-				{
-					imgFilter.at<uchar>(j, i - sum) = 0;
-				}
-			}
-		}
-	}
-	for (int i = 4; i < (img.rows - 4); i+=4) //Cycle over horizontal clusters
-	{
-		for (int j = 4; j < (img.cols - 4); j+=4) //Cycle over vertical clusters
-		{
-			if (imgFilter.at<uchar>(j, i) == 255) sum++;
-			else if (sum > 0 && sum < 4 && j >= 16)
-			{
-				for (sum; sum == 0; sum--)
-				{
-					imgFilter.at<uchar>(j, i - sum) = 0;
-				}
-			}
-		}
-	}
+	//for (int i = 4; i < (img.cols - 4); i+=4) //Cycle over vertical clusters
+	//{
+		//sum = 0;
+		//for (int j = 4; j < (img.rows - 4); j+=4) //Cycle over horizontal clusters
+		//{
+			//if (imgFilter.at<uchar>(j, i) == 255) sum++;
+			//else if (sum > 0 && sum < 4 && j >= 16)
+			//{
+				//for (sum; sum == 0; sum--)
+				//{
+					//for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
+					//{
+						//for (int l = 0; l < 4; l++) //Cycle vertically within cluster
+						//{
+							//imgFilter.at<uchar>(i + k, j + l) = 255;
+						//}
+					//}
+				//}
+			//}
+			//else sum = 0;
+		//}
+	//}
+	//for (int i = 4; i < (img.rows - 4); i+=4) //Cycle over horizontal clusters
+	//{
+		//sum = 0;
+		//for (int j = 4; j < (img.cols - 4); j+=4) //Cycle over vertical clusters
+		//{
+			//if (imgFilter.at<uchar>(j, i) == 255) sum++;
+			//else if (sum > 0 && sum < 4 && j >= 16)
+			//{
+				//for (sum; sum == 0; sum--)
+				//{
+					//imgFilter.at<uchar>(j, i - sum) = 0;
+				//}
+			//}
+			//else sum = 0;
+		//}
+	//}
+}
+
+void average_frame()
+{
+	accumulateWeighted(imgFilter, imgHist, ((double) weighting/255));
 }

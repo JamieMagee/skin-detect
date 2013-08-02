@@ -15,18 +15,19 @@ using namespace std;
 #define DILATE_SIZE 3
 #define DEVIATION 2
 
-Mat img, imgFilter;
+Mat img, imgFilter, imgHist;
 int c;
 VideoCapture cap;
 
 //Default Values
-int cs = 1, dr = 1, lr = 1, gc = 1;
+int cs = 1, dr = 1, lr = 1, gc = 1, af = 1;
 int min_Cr = MINCR, max_Cr = MAXCR, min_Cb = MINCB, max_Cb = MAXCB;
 int erode1 = ERODE_SIZE;
 int dilate1 = DILATE_SIZE;
 int erode2 = ERODE_SIZE;
 int dilate2 = DILATE_SIZE;
 int deviation = DEVIATION;
+int weighting = 255;
 
 //Window names
 string window1_name = "Video";
@@ -39,3 +40,4 @@ void colour_segmentation();
 void density_regularisation();
 void luminance_regularisation();
 void geometric_correction();
+void average_frame();
