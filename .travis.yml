@@ -5,7 +5,7 @@ compiler:
   - clang
 
 before_install:
-  - ./opencv2_4_6_1.sh
+  - ./Install-OpenCV/get_latest_version_download_file.sh
   
 before_script:
   - mkdir bin
