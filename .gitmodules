@@ -1,0 +1,3 @@
+[submodule "Install-OpenCV"]
+	path = Install-OpenCV
+	url = https://github.com/jayrambhia/Install-OpenCV.git
