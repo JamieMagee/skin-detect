@@ -5,8 +5,10 @@ compiler:
   - clang
 
 before_install:
-  - chmod +x Install-OpenCV/Ubuntu/opencv_latest.sh
-  - ./Install-OpenCV/Ubuntu/opencv_latest.sh
+  - cd Install-OpenCV/Ubuntu
+  - chmod +x opencv_latest.sh
+  - ./opencv_latest.sh
+  - cd ../..
   
 before_script:
   - mkdir bin
