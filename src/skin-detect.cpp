@@ -281,7 +281,7 @@ void luminance_regularisation()
 
 void geometric_correction()
 {
-	int erode, dilate, sum;
+	int erode, dilate;
 	for (int i = 4; i < (img.rows - 4); i+=4) //Cycle over horizontal clusters
 	{
 		for (int j = 4; j < (img.cols - 4); j+=4) //Cycle over vertical clusters
@@ -336,44 +336,6 @@ void geometric_correction()
 			}
 		}
 	}
-	//for (int i = 4; i < (img.cols - 4); i+=4) //Cycle over vertical clusters
-	//{
-		//sum = 0;
-		//for (int j = 4; j < (img.rows - 4); j+=4) //Cycle over horizontal clusters
-		//{
-			//if (imgFilter.at<uchar>(j, i) == 255) sum++;
-			//else if (sum > 0 && sum < 4 && j >= 16)
-			//{
-				//for (sum; sum == 0; sum--)
-				//{
-					//for (int k = 0; k < 4; k++) //Cycle horizontally within cluster
-					//{
-						//for (int l = 0; l < 4; l++) //Cycle vertically within cluster
-						//{
-							//imgFilter.at<uchar>(i + k, j + l) = 255;
-						//}
-					//}
-				//}
-			//}
-			//else sum = 0;
-		//}
-	//}
-	//for (int i = 4; i < (img.rows - 4); i+=4) //Cycle over horizontal clusters
-	//{
-		//sum = 0;
-		//for (int j = 4; j < (img.cols - 4); j+=4) //Cycle over vertical clusters
-		//{
-			//if (imgFilter.at<uchar>(j, i) == 255) sum++;
-			//else if (sum > 0 && sum < 4 && j >= 16)
-			//{
-				//for (sum; sum == 0; sum--)
-				//{
-					//imgFilter.at<uchar>(j, i - sum) = 0;
-				//}
-			//}
-			//else sum = 0;
-		//}
-	//}
 }
 
 void average_frame()
