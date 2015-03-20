@@ -6,10 +6,10 @@ compiler:
 
 before_install:
   - sudo apt-get -qq update
-  - cd Install-OpenCV/Ubuntu
-  - chmod +x opencv_latest.sh
-  - ./opencv_latest.sh
-  - cd ../..
+  - cd Install-OpenCV/Ubuntu/2.4
+  - chmod +x opencv2_4_9.sh
+  - ./opencv2_4_9.sh
+  - cd ../../..
   
 before_script:
   - mkdir bin
